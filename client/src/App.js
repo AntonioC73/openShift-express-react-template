@@ -39,7 +39,7 @@ class App extends Component {
   
   
   componentDidMount() {	  
-	  //this.intervalId = setInterval(() => this.loadData(), 60000);
+	  this.intervalId = setInterval(() => this.loadData(), 60000);
 	  this.loadData(); // also load one immediately
   }  
   
