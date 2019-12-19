@@ -30,6 +30,21 @@
   color: #61dafb;
 }
 
+
+.divmapclass{
+	height: 550px;
+	width: 90%;
+	margin: 0 auto;
+	align-content: center;
+}
+
+.divtableclass{
+	height: 600px;
+	align-content: center;
+	width: 70%;
+	margin: 0 auto;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

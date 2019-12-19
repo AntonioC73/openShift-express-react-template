@@ -7,39 +7,75 @@ import { Map, Marker, Popup, TileLayer } from 'react-leaflet'
 
 class App extends Component {
 	
+  augmentCheckpointData(d) {
+	  const checkpointNames = topology.map((t) => { return t.checkpoint});
+	  const index = checkpointNames.indexOf(d.checkpoint);
+	  if (d.checkpointtype == 'crossing' && d.direction == 'in' && index >= 0) {
+		  return Object.assign({}, d, topology[index]);
+	  } else {
+		  return null;
+	  }
+  }
+	
   render() {
-	  
 	const position = [this.state.lat, this.state.lng]
-	
-	const markers = (<React.Fragment>
-	{this.state.data.map((d) => {
-		d.position = position.map((x)=>{ return x+Math.random()/100});
-		return (<Marker position={d.position}><Popup>{d.checkpoint}: {d.count}</Popup></Marker>);
-	})}
-	</React.Fragment>);
-	
+	/*	  
+	for(var i = 0; i < topology.length; i++) {
+	    var chkname = topology[i].checkpoint;
+	    
+	    this.state.data.forEach(
+	    		function(obj) {
+	    			console.log(obj.checkpoint);
+	    			console.log(obj.checkpointtype);
+	    			console.log(obj.direction);
+	    			console.log(obj.count);
+	    			
+	    			if (chkname == obj.checkpoint && 'crossing' == obj.checkpointtype){
+	    				alert (obj.checkpoint + ":" + obj.count + "-" + obj.direction);
+	    			}
+	    		});
+	}
+	*/	
+	const markers = (
+			<React.Fragment>
+				{this.state.data.map((d) => {
+					d = this.augmentCheckpointData(d);
+					if (d) {
+						return <Marker position={[d.lat, d.lng]}>
+									<Popup>{d.checkpoint}: {d.count} - {d.direction}</Popup>
+								</Marker>;	
+					}
+					return null;
+					})
+				}
+			</React.Fragment>);
+		
     return (      
       <div>
-	     
-	      <Map center={position} zoom={this.state.zoom}>
-	      <TileLayer
-	        attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-	        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-	      {markers}
-	      </Map>
-	      
-	     
-	     <Table columns={columns} dataSource={this.state.data} bordered="true" pagination={{pageSize: 20}} showHeader="true" size="small" />
-	     {/* todo */}
+	      <div id="mapid" class="divmapclass">
+		      <Map center={position} viewport={this.state.viewport} style={{height : '500px'}}>
+		      <TileLayer
+		        attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+		        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+		        	{markers}
+		      </Map>
+	      </div>
+	     <div id="tableid" class="divtableclass"> 
+	     	<Table columns={columns} dataSource={this.state.data} bordered="true" pagination={{pageSize: 20}} showHeader="true" size="small" />
+	     {/* todo */} 
+	     </div>
       </div>
 
     );
-  }
+  } // end render()
   
   
   
   componentDidMount() {	  
-	  this.intervalId = setInterval(() => this.loadData(), 60000);
+	  this.intervalId = setInterval(
+			  () => this.loadData(),
+			  60000
+			  );
 	  this.loadData(); // also load one immediately
   }  
   
@@ -54,9 +90,12 @@ class App extends Component {
 				"Accept":"application/json"
 			},
 	    })
-	    .then(response => response.json()).then((json) => {
-	      this.setState({ data: json });
-	    }).catch((error) => alert(error.message));
+	    .then(response => response.json()).then(
+	    		(json) => {
+	    					this.setState({ data: json });
+	    					}).catch(
+	    							(error) => alert(error.message)
+	    					);
 	  
   }
   
@@ -65,9 +104,13 @@ class App extends Component {
   }
   
   state = {
-		  lat: 40.7462,
-		  lng: 14.4989,
-		  zoom: 17,
+		  //lat: 40.751210, 
+		  //lng: 14.488297,
+		  //zoom: 16,
+		  viewport: {
+			  center: [40.751210, 14.488297],
+			  zoom: 16,
+			},
 		  data: [
 		    {
 		      key: '1',
@@ -97,7 +140,30 @@ class App extends Component {
   };
   
   
-}
+} // end class component
+
+
+
+
+
+const topology = [
+	  {
+	    checkpoint: 'Anfiteatro',
+	    lat: 40.750984,
+		lng: 14.494694
+	  },
+	  {
+		checkpoint: 'PortaMarina',
+		lat: 40.7484834,
+		lng: 14.4830869
+	  },
+	  {
+		checkpoint: 'Foro',
+	    lat: 40.7491175,
+		lng: 14.4845247
+	  }
+	]
+
 
 const columns = [
   {
@@ -155,6 +221,16 @@ const columns = [
   }
   
 ]
+
+
+const DEFAULT_VIEWPORT = {
+	center: [51.505, -0.09],
+	zoom: 13
+}
+ const MAPDIVSTYLE = {
+	height: "800px",
+	width: "90%"
+}
 
 export default App;
 
